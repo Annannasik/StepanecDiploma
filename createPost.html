@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Створення посту</title>
+    <!-- Подключаем стили, если они нужны -->
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="scripts/scripts.js"></script>
+</head>
+<body>
+    <!-- Шапка страницы -->
+    <div class="header">
+        <!-- Логотип -->
+        <a href="index.html" class="logo-link">
+            <img src="resource/logo.png" alt="Логотип" class="logo">
+        </a>
+        
+        <!-- Ссылки на разделы -->
+        <div class="links">
+            <a class="textHeader">СТВОРЕННЯ ПУБЛІКАЦІЇ</a>
+        </div>
+
+        <!-- Кнопки логина -->
+        <div class="login-buttons">
+            <div class="logout-container">
+                <a href="index.html">
+                    <button id="logoutButton" class="back-button">Назад</button>
+                </a>
+                <p id="greeting" class="greeting"></p>
+            </div>
+        </div>
+    </div>
+    <div class="formConteiner">
+        <form id="create-post-form">
+            <label for="postTitle">Заголовок статті:</label>
+            <input type="text" id="postTitle" name="postTitle" required>
+            <br><br>
+
+            <label for="postImage">Титульна картинка статті:</label>
+            <input type="file" id="postImage" name="postImage" accept="image/*" required>
+            <br><br>
+
+            <label for="postText">Текст статті:</label>
+            <textarea id="postText" name="postText" rows="5" required></textarea>
+            <br><br>
+
+            <label for="sourceLink">Посилання на джерело:</label>
+            <input type="url" id="sourceLink" name="sourceLink" required>
+            <br><br>
+
+            <input type="submit" value="Створити пост">
+        </form>
+    </div>
+    <script>
+        document.getElementById('create-post-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+            // Создаем объект FormData для передачи данных формы, включая файл изображения
+            const formData = new FormData();
+            formData.append('postTitle', document.getElementById('postTitle').value);
+            formData.append('postText', document.getElementById('postText').value);
+            formData.append('sourceLink', document.getElementById('sourceLink').value);
+            formData.append('postImage', document.getElementById('postImage').files[0]); // Раскомментируйте эту строку
+    
+            fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    //window.location.href = '../index.html';
+                    console.log('Стаття додана');
+                } else {
+                    console.error('Помилка збереження статті:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Помилка відправки запиту:', error);
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статьи</title>
+    <!-- Подключаем стили, если они нужны -->
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <!-- Шапка страницы -->
+    <div class="header">
+        <!-- Логотип -->
+        <a href="index.html" class="logo-link">
+            <img src="resource/logo.png" alt="Логотип" class="logo">
+        </a>
+        
+        <div class="links">
+            <a class="textHeader">СТАТТІ</a>
+        </div>
+
+        <!-- Кнопки логина -->
+        <div class="login-buttons">
+            <div class="logout-container">
+                <a href="index.html">
+                    <button id="logoutButton" class="back-button">Назад</button>
+                </a>
+                <p id="greeting" class="greeting"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для статей -->
+    <div id="articles-container" class="articles-container">
+        <!-- Здесь будут отображаться статьи -->
+    </div>
+</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/articles'); // Отправляем запрос на сервер для получения всех статей
+            const articles = await response.json(); // Получаем данные статей в формате JSON
+
+            // Получаем контейнер для статей
+            const articlesContainer = document.getElementById('articles-container');
+
+            // Добавляем каждую статью на страницу
+            articles.forEach(article => {
+                // Создаем элементы для отображения данных статьи
+                const articleElement = document.createElement('div');
+                articleElement.classList.add('article');
+                articleElement.innerHTML = `
+                    <img src="${article.image}" alt="Article Image">
+                    <h2>${article.title}</h2>
+                    <div class="article-text">${article.textPlain.length > 1000 ? article.textPlain.slice(0, 1000) + '...' : article.textPlain}</div>
+                    <a href="${article.sourceLink}">Источник</a>
+                `;
+
+                articleElement.addEventListener('click', () => {
+                    window.location.href = `/article-details.html?id=${article._id}`;
+                });
+
+                // Добавляем созданные элементы в контейнер для статей
+                articlesContainer.appendChild(articleElement);
+            });
+        } catch (error) {
+            console.error('Ошибка при получении статей:', error);
+        }
+    });
+    </script>
+</html>

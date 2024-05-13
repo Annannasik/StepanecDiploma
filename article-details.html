@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Details</title>
+    <!-- Подключаем стили Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/bckgrnd.css">
+    <script src="scripts/bckgrnd.js"></script>
+    <script src="scripts/scriptsPosts.js"></script>
+    <style>
+        /* Удаление hover-эффекта с карточки Bootstrap */
+        .no-hover:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        /* Отступы для заголовка и кнопки */
+        .btn-primary {
+            margin-left: 12px; /* Можно увеличить или уменьшить значение отступа по вашему желанию */
+        }
+
+        /* Стили для карточки */
+        .card {
+            background-color: #181e22; /* Цвет фона */
+        }
+
+        /* Стили для текста на карточке */
+        .card-title,
+        .text-body-secondary {
+            color: white; /* Белый цвет текста */
+        }
+        /* Стили для кнопки Завантажити */
+        #download-button {
+            background-color: green; /* Зеленый цвет фона */
+        }
+
+        /* Стили для полужирного текста */
+        .font-weight-bold {
+            font-weight: bold;
+        }
+        /* Стили для даты */
+        #publication-date {
+        color: white !important; /* Белый цвет текста */
+        }
+        .editor-description {
+            position: relative;
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 1.2rem; /* Больший размер шрифта */
+        }
+        .bold-italic {
+            font-style: italic;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Контейнер для фона -->
+    <div class="background-container"></div>
+
+    <!-- Шапка страницы -->
+    <div class="header">
+        <!-- Логотип -->
+        <a href="index.html" class="logo-link">
+            <img src="resource/logo.png" alt="Логотип" class="logo">
+        </a>
+        
+        <!-- Ссылки на разделы -->
+        <div class="links">
+            <div class="dropdown" onmouseleave="hideCategories()">
+                <a href="postsBootstrap.html?category=all" class="link"  onmouseover="showCategories()">ПУБЛІКАЦІЇ</a>
+                <div id="categoryDropdown" class="dropdown-content" onmouseleave="hideCategories()">
+                    <!-- Здесь будут категории -->
+                </div>
+            </div>
+            <a href="#" class="link">ЧАТ</a>
+            <a href="createPostTiny.html" class="link" id="addLink" style="display: none;">ДОДАТИ</a>
+        </div>
+
+        <!-- Кнопки логина -->
+        <div class="login-buttons">
+            <div class="button-container">
+                <button id="favoritesButton" class="favorites-button" style="display: none;" onclick="viewFavorites()">Вибране</button>
+            </div>
+            <div class="logout-container">
+                <button id="logoutButton" class="back-button" onclick="goBack()">Назад</button>
+                <p id="greeting" class="greeting"></p>
+            </div>
+        </div>
+    </div>
+
+<!-- Основной блок с использованием Bootstrap -->
+<div class="details-container">
+    <div class="no-hover card mb-1">
+        <div class="row g-0">
+            <div class="col-md-2">
+                <!-- Изображение статьи -->
+                <img src="" class="img-fluid rounded-start" id="article-image" style="max-width: 150px; display: block;" alt="Article Image">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body text-start">
+                    <!-- Дата публикации -->
+                    <p class="card-text"><small class="text-body-secondary font-weight-bold" id="publication-date"></small></p>
+                    <!-- Заголовок статьи -->
+                    <h5 class="card-title fw-bold display-6 mt-4" id="article-title"></h5>
+                </div>
+                <!-- Кнопки -->
+                <div class="mt-4 text-start " id="buttonsContainer">
+                    <p class="card-text text-start" id="favoriteText"></p>
+                    <button id="download-button" class="btn btn-secondary">Завантажити</button>
+                    <a id="article-source-link" href="#" class="btn btn-primary font-weight-bold">Джерело</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Описание статьи от редактора -->
+    <div class="editor-description">Опис від редактора</div>
+    <!-- Форматированный текст статьи -->
+    <div id="article-text" style="text-align: left;"></div>
+    <div class="mt-4 text-start">
+        <p class="card-text text-start"><span class="bold-italic">Категорії: </span><span id="article-categories"></span></p>
+    </div>
+</div>
+
+    <!-- Подключаем скрипт Bootstrap для работы JavaScript компонентов -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- JavaScript код для загрузки и отображения статей -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const articleId = urlParams.get('id');
+                
+                if (!articleId) {
+                    console.error('Не удалось получить идентификатор статьи');
+                    return;
+                }
+                const responseUser = await fetch('/getRole');
+                const data = await responseUser.json();
+                const userRole = data.role;
+
+                const buttonsContainer = document.getElementById('buttonsContainer');
+                if (userRole === 'admin') {
+                    buttonsContainer.innerHTML += `
+                        <button id="editButton" class="btn btn-warning me-2">Редагувати</button>
+                        <button id="deleteButton" class="btn btn-danger">Видалити</button>
+                    `;
+                } else if(userRole === 'editor'){
+                    buttonsContainer.innerHTML += `
+                        <button id="editButton" class="btn btn-warning me-2">Редагувати</button>
+                    `;
+                }else {
+                    // Если пользователь не админ или редактор, скрываем кнопки
+                    const editButton = document.getElementById('editButton');
+                    if (editButton) {
+                        editButton.style.display = 'none';
+                    }
+                    const deleteButton = document.getElementById('deleteButton');
+                    if (deleteButton) {
+                        deleteButton.style.display = 'none';
+                    }
+                }
+
+                const response = await fetch(`/articles/${articleId}`);
+                const article = await response.json();
+                const categoryNames = await loadCategoryNames(article.categories);
+
+                // Отображаем подробную информацию о статье
+                const articleTitle = document.getElementById('article-title');
+                const articleText = document.getElementById('article-text');
+                const articleImage = document.getElementById('article-image');
+                const articleSourceLink = document.getElementById('article-source-link');
+                const publicationDate = document.getElementById('publication-date');
+                const articleCategories = document.getElementById('article-categories');
+
+                articleTitle.textContent = article.title;
+                articleText.innerHTML = article.textFormatted; // Используем innerHTML вместо textContent
+                articleImage.src = article.image;
+                articleSourceLink.href = article.sourceLink;
+                publicationDate.textContent = article.creationTime;
+                articleCategories.textContent = categoryNames.join(', ');
+                addButtonsToArticle(article, data);
+            } catch (error) {
+                console.error('Ошибка при получении подробной информации о статье:', error);
+            }
+
+            // Обработчик события для кнопки "Завантажити"
+            const downloadButton = document.getElementById('download-button');
+            downloadButton.addEventListener('click', async function(event) {
+                event.preventDefault(); // Предотвращаем стандартное действие перехода по ссылке
+                const urlParams = new URLSearchParams(window.location.search);
+                const articleId = urlParams.get('id');
+                const response = await fetch(`/articles/${articleId}`);
+                const article = await response.json();
+                const downloadUrl = article.filePdf; // Получаем ссылку из атрибута href
+                try {
+                    console.log(downloadUrl)
+                    const response = await fetch(downloadUrl);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'downloaded.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error('Ошибка при загрузке файла:', error);
+                }
+            });
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            // Обработчик события для кнопки "Редагувати"
+            const editButton = document.getElementById('editButton');
+            editButton.addEventListener('click', function() {
+                // Редирект на страницу редактирования с передачей идентификатора статьи
+                window.location.href = `/editPostTiny.html?id=${articleId}`;
+            });
+
+            // Обработчик события для кнопки "Видалити"
+            const deleteButton = document.getElementById('deleteButton');
+            deleteButton.addEventListener('click', async function() {
+                const confirmation = confirm('Ви впевнені, що хочете видалити цю статтю?');
+                if (!confirmation) return; // Если пользователь отменил удаление, ничего не делаем
+                try {
+                    const response = await fetch(`/articles/${articleId}`, {
+                        method: 'DELETE',
+                    });
+                    if (!response.ok) {
+                        throw new Error('Ошибка удаления статьи');
+                    }
+                    const result = await response.json();
+                    console.log(result.message);
+                    window.history.back();
+                } catch (error) {
+                    console.error('Ошибка при удалении статьи:', error);
+                    // Обработка ошибок удаления статьи
+                }
+            });
+        });
+        async function addButtonsToArticle(article, user) {
+            const favoriteTextContainer = document.getElementById(`favoriteText`);
+
+            // Проверяем, что контейнеры существуют
+            if (favoriteTextContainer) {
+                favoriteTextContainer.innerHTML = getFavoriteTextButtons(user, article._id);
+            }
+        }
+        function getFavoriteTextButtons(user, articleId) {
+            const addFavoriteButton = `
+                <button type="button" class="btn btn-success me-2" onclick="addToFavoritesFromDetails('${articleId}', event)">Додати в улюблене</button>
+            `;
+            const deleteFavoriteButton = `
+                <button type="button" class="btn btn-danger" onclick="deleteFromFavoritesFromDetails('${articleId}', event)">Видалити з улюбленого</button>
+            `;
+
+            if (user.favoriteArticles.includes(articleId)) {
+                return deleteFavoriteButton;
+            } else {
+                return addFavoriteButton;
+            }
+        }
+        // Функция для добавления статьи в избранное
+        async function addToFavoritesFromDetails(articleId, event) {
+            event.stopPropagation(); // Останавливаем распространение события клика
+
+            try {
+                // Отправляем запрос на сервер для добавления статьи в список избранных
+                const response = await fetch(`/addToFavorites/${articleId}`, {
+                    method: 'POST',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при добавлении статьи в избранное');
+                }
+
+                // Получаем результат добавления избранной статьи
+                const result = await response.json();
+                console.log(result.message); // Выводим сообщение об успешном добавлении
+
+                // Обновляем данные о пользователе и его избранных статьях
+                user = await getUserRole();
+                // Обновляем кнопки "Добавить в избранное" или "Удалить из избранного"
+                const favoriteTextContainer = document.getElementById(`favoriteText`);
+                favoriteTextContainer.innerHTML = getFavoriteTextButtons(user, articleId); // Используем article._id
+                //window.location.reload();
+                console.log(user);
+            } catch (error) {
+                console.error('Ошибка при добавлении статьи в избранное:', error);
+                // Обработка ошибок добавления статьи в избранное
+            }
+        }
+
+        // Функция для удаления статьи из избранного
+        async function deleteFromFavoritesFromDetails(articleId, event) {
+            event.stopPropagation(); // Останавливаем распространение события клика
+
+            try {
+                // Отправляем запрос на сервер для удаления статьи из списка избранных
+                const response = await fetch(`/deleteFromFavorites/${articleId}`, {
+                    method: 'POST',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении статьи из избранного');
+                }
+
+                // Получаем результат удаления избранной статьи
+                const result = await response.json();
+                console.log(result.message); // Выводим сообщение об успешном удалении
+
+                // Обновляем данные о пользователе и его избранных статьях
+                user = await getUserRole();
+                // Обновляем кнопки "Добавить в избранное" или "Удалить из избранного"
+                const favoriteTextContainer = document.getElementById(`favoriteText`);
+                favoriteTextContainer.innerHTML = getFavoriteTextButtons(user, articleId); // Используем article._id
+                //window.location.reload();
+                console.log(user);  
+            } catch (error) {
+                console.error('Ошибка при удалении статьи из избранного:', error);
+                // Обработка ошибок удаления статьи из избранного
+            }
+        }
+    </script>
+</body>
+</html>

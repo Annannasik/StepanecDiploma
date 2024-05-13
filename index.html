@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Збережи себе</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <script src="scripts/scripts.js"></script>
+    <link rel="stylesheet" href="styles/bckgrnd.css">
+    <script src="scripts/bckgrnd.js"></script>
+</head>
+<body>
+    <!-- Контейнер для фона -->
+    <div class="background-container"></div>
+    <!-- Шапка страницы -->
+    <div class="header">
+        <!-- Логотип -->
+        <a href="index.html" class="logo-link">
+            <img src="resource/logo.png" alt="Логотип" class="logo">
+        </a>
+        
+        <!-- Ссылки на разделы -->
+        <div class="links">
+            <div class="dropdown" onmouseleave="hideCategories()">
+                <a href="postsBootstrap.html?category=all" class="link"  onmouseover="showCategories()">ПУБЛІКАЦІЇ</a>
+                <div id="categoryDropdown" class="dropdown-content" onmouseleave="hideCategories()">
+                    <!-- Здесь будут категории -->
+                </div>
+            </div>
+            <a href="#" class="link">ЧАТ</a>
+            <a href="createPostTiny.html" class="link" id="addLink" style="display: none;">ДОДАТИ</a>
+        </div>
+
+        <!-- Кнопки логина -->
+        <div class="login-buttons">
+            <!-- <p id="greeting" class="greeting"></p> -->
+            <a href="login/login.html" id="loginLink">
+                <button class="login-button">Увійти</button>
+            </a>
+            <a href="login/registerPage.html" id="registerLink">
+                <button class="register-button">Зареєструватися</button>
+            </a>
+            <!-- <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Вийти</button> -->
+            <div class="logout-container">
+                <div class="button-container">
+                    <button id="favoritesButton" class="favorites-button" style="display: none;" onclick="viewFavorites()">Вибране</button>
+                    <button id="logoutButton" class="logout-button" style="display: none;" onclick="logout()">Вийти</button>
+                </div>
+                <p id="greeting" class="greeting"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент страницы -->
+    <div class="main-content">
+        <!-- Здесь будет ваш основной контент страницы -->
+    </div>
+</body>
+</html>
